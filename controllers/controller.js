@@ -2,6 +2,16 @@ const { Services } = require("../services");
 const { responseHelper } = require("../helper");
 const bcrypt = require("bcryptjs");
 
+const getIP = async (req, res) => {
+  try {
+    const clientIP = await Services.getIP(req);
+    res.json({ ip: clientIP });
+  } catch (error) {
+    console.error("Failed to get client IP", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -69,6 +79,18 @@ const catalogData = async (req, res) => {
 const terbaru = async (req, res) => {
   try {
     const result = await Services.terbaru();
+    if (result instanceof Error) {
+      throw new Error(result);
+    }
+    res.status(responseHelper.status.success).json(result);
+  } catch (error) {
+    res.status(responseHelper.status.error).json(error.message);
+  }
+};
+
+const logArchive = async (req, res) => {
+  try {
+    const result = await Services.logArchive();
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -219,8 +241,12 @@ const detail_user = async (req, res) => {
 
 const create_user = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { username, password, satker, level_user_id } = req.body.data;
     const result = await Services.create_user(
+      user_id,
+      ip,
       username,
       password,
       satker,
@@ -249,6 +275,8 @@ const read_user = async (req, res) => {
 
 const update_user = async (req, res) => {
   try {
+    const uid = req.verified;
+    const ip = req.body.ip;
     // Ambil data yang akan diubah dari permintaan
     const { user_id, username, password, satker, level_user_id } =
       req.body.data;
@@ -274,7 +302,12 @@ const update_user = async (req, res) => {
     }
 
     // Panggil layanan (service) untuk melakukan pembaruan
-    const result = await Services.update_user(user_id, updatedUserData);
+    const result = await Services.update_user(
+      uid,
+      ip,
+      user_id,
+      updatedUserData
+    );
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -289,9 +322,10 @@ const update_user = async (req, res) => {
 const delete_user = async (req, res) => {
   try {
     const user_id = req.verified;
+    const ip = req.body.ip;
     const { username } = req.body;
 
-    const result = await Services.delete_user(username);
+    const result = await Services.delete_user(user_id, ip, username);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -440,8 +474,10 @@ const cabinet = async (req, res) => {
 
 const insertCatalog = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.insertCatalog(label);
+    const result = await Services.insertCatalog(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -454,8 +490,10 @@ const insertCatalog = async (req, res) => {
 
 const insertCondition = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.insertCondition(label);
+    const result = await Services.insertCondition(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -468,8 +506,10 @@ const insertCondition = async (req, res) => {
 
 const insertType = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.insertType(label);
+    const result = await Services.insertType(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -482,8 +522,10 @@ const insertType = async (req, res) => {
 
 const insertClassArchive = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.insertClassArchive(label);
+    const result = await Services.insertClassArchive(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -496,9 +538,11 @@ const insertClassArchive = async (req, res) => {
 
 const insertBuilding = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
     console.log(req.body.data);
-    const result = await Services.insertBuilding(label);
+    const result = await Services.insertBuilding(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -511,8 +555,10 @@ const insertBuilding = async (req, res) => {
 
 const insertRoom = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.insertRoom(label);
+    const result = await Services.insertRoom(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -525,8 +571,10 @@ const insertRoom = async (req, res) => {
 
 const insertRollOPack = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.insertRollOPack(label);
+    const result = await Services.insertRollOPack(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -539,8 +587,10 @@ const insertRollOPack = async (req, res) => {
 
 const insertCabinet = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.insertCabinet(label);
+    const result = await Services.insertCabinet(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -553,8 +603,10 @@ const insertCabinet = async (req, res) => {
 
 const deleteCondition = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteCondition(label);
+    const result = await Services.deleteCondition(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -567,8 +619,10 @@ const deleteCondition = async (req, res) => {
 
 const deleteType = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteType(label);
+    const result = await Services.deleteType(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -581,8 +635,10 @@ const deleteType = async (req, res) => {
 
 const deleteClassArchive = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteClassArchive(label);
+    const result = await Services.deleteClassArchive(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -595,8 +651,10 @@ const deleteClassArchive = async (req, res) => {
 
 const deleteBuilding = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteBuilding(label);
+    const result = await Services.deleteBuilding(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -609,8 +667,10 @@ const deleteBuilding = async (req, res) => {
 
 const deleteRoom = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteRoom(label);
+    const result = await Services.deleteRoom(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -623,8 +683,10 @@ const deleteRoom = async (req, res) => {
 
 const deleteRollOPack = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteRollOPack(label);
+    const result = await Services.deleteRollOPack(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -637,8 +699,10 @@ const deleteRollOPack = async (req, res) => {
 
 const deleteCabinet = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteCabinet(label);
+    const result = await Services.deleteCabinet(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -651,8 +715,10 @@ const deleteCabinet = async (req, res) => {
 
 const deleteCatalog = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label } = req.body.data;
-    const result = await Services.deleteCatalog(label);
+    const result = await Services.deleteCatalog(user_id, ip, label);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -665,8 +731,10 @@ const deleteCatalog = async (req, res) => {
 
 const updateCatalog = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateCatalog(label, id);
+    const result = await Services.updateCatalog(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -679,8 +747,10 @@ const updateCatalog = async (req, res) => {
 
 const updateCondition = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateCondition(label, id);
+    const result = await Services.updateCondition(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -693,8 +763,10 @@ const updateCondition = async (req, res) => {
 
 const updateType = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateType(label, id);
+    const result = await Services.updateType(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -707,8 +779,10 @@ const updateType = async (req, res) => {
 
 const updateClassArchive = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateClassArchive(label, id);
+    const result = await Services.updateClassArchive(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -721,8 +795,10 @@ const updateClassArchive = async (req, res) => {
 
 const updateBuilding = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateBuilding(label, id);
+    const result = await Services.updateBuilding(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -735,8 +811,10 @@ const updateBuilding = async (req, res) => {
 
 const updateRoom = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateRoom(label, id);
+    const result = await Services.updateRoom(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -749,8 +827,10 @@ const updateRoom = async (req, res) => {
 
 const updateRollOPack = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateRollOPack(label, id);
+    const result = await Services.updateRollOPack(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -763,8 +843,10 @@ const updateRollOPack = async (req, res) => {
 
 const updateCabinet = async (req, res) => {
   try {
+    const user_id = req.verified;
+    const ip = req.body.ip;
     const { label, id } = req.body.data;
-    const result = await Services.updateCabinet(label, id);
+    const result = await Services.updateCabinet(user_id, ip, label, id);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -776,11 +858,13 @@ const updateCabinet = async (req, res) => {
 };
 
 module.exports = {
+  getIP,
   login,
   home,
   dashboardData,
   catalogData,
   terbaru,
+  logArchive,
   archive_by_category,
   archive_by_date,
   bardata,

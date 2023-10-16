@@ -7,6 +7,8 @@ const { Validation } = require("../validators");
 
 // router.route('/register').post(Validation.register, controller.register)
 
+router.get('/getIP', controller.getIP);
+
 router.route("/login").post(Validation.login, controller.login);
 
 router.route("/home").post(controller.home);
@@ -18,6 +20,8 @@ router.route("/bardata").post(controller.bardata);
 router.route("/catalogData").post(controller.catalogData);
 
 router.route("/terbaru").post(controller.terbaru);
+
+router.route("/logArchive").post(controller.logArchive);
 
 router.route("/category").post(controller.archive_by_category);
 
@@ -33,13 +37,13 @@ router
 
 router.route("/detailUser").post(controller.detail_user);
 
-router.route("/createUser").post(controller.create_user);
+router.route("/createUser").post(Auth.verifyToken, controller.create_user);
 
 router.route("/readUser").post(controller.read_user);
 
-router.route("/uppdateUser").post(controller.update_user);
+router.route("/uppdateUser").post(Auth.verifyToken, controller.update_user);
 
-router.route("/deleteUser").post(controller.delete_user);
+router.route("/deleteUser").post(Auth.verifyToken, controller.delete_user);
 
 router.route("/logout").post(Auth.verifyToken, controller.logout);
 
@@ -63,52 +67,52 @@ router.route("/ROLL%20O%20PACK").post(controller.rollopack);
 
 router.route("/LEMARI").post(controller.cabinet);
 
-router.route("/insertCatalog").post(controller.insertCatalog)
+router.route("/insertCatalog").post(Auth.verifyToken, controller.insertCatalog);
 
-router.route("/insertCondition").post(controller.insertCondition)
+router.route("/insertCondition").post(Auth.verifyToken, controller.insertCondition);
 
-router.route("/insertType").post(controller.insertType)
+router.route("/insertType").post(Auth.verifyToken, controller.insertType);
 
-router.route("/insertClassArchive").post(controller.insertClassArchive)
+router.route("/insertClassArchive").post(Auth.verifyToken, controller.insertClassArchive);
 
-router.route("/insertBuilding").post(controller.insertBuilding)
+router.route("/insertBuilding").post(Auth.verifyToken, controller.insertBuilding);
 
-router.route("/insertRoom").post(controller.insertRoom)
+router.route("/insertRoom").post(Auth.verifyToken, controller.insertRoom);
 
-router.route("/insertRollOPack").post(controller.insertRollOPack)
+router.route("/insertRollOPack").post(Auth.verifyToken, controller.insertRollOPack);
 
-router.route("/insertCabinet").post(controller.insertCabinet)
+router.route("/insertCabinet").post(Auth.verifyToken, controller.insertCabinet);
 
-router.route("/deleteCatalog").post(controller.deleteCatalog)
+router.route("/deleteCatalog").post(Auth.verifyToken, controller.deleteCatalog);
 
-router.route("/deleteCondition").post(controller.deleteCondition)
+router.route("/deleteCondition").post(Auth.verifyToken, controller.deleteCondition);
 
-router.route("/deleteType").post(controller.deleteType)
+router.route("/deleteType").post(Auth.verifyToken, controller.deleteType);
 
-router.route("/deleteClassArchive").post(controller.deleteClassArchive)
+router.route("/deleteClassArchive").post(Auth.verifyToken, controller.deleteClassArchive);
 
-router.route("/deleteBuilding").post(controller.deleteBuilding)
+router.route("/deleteBuilding").post(Auth.verifyToken, controller.deleteBuilding);
 
-router.route("/deleteRoom").post(controller.deleteRoom)
+router.route("/deleteRoom").post(Auth.verifyToken, controller.deleteRoom);
 
-router.route("/deleteRollOPack").post(controller.deleteRollOPack)
+router.route("/deleteRollOPack").post(Auth.verifyToken, controller.deleteRollOPack);
 
-router.route("/deleteCabinet").post(controller.deleteCabinet)
+router.route("/deleteCabinet").post(Auth.verifyToken, controller.deleteCabinet);
 
-router.route("/updateCatalog").post(controller.updateCatalog)
+router.route("/updateCatalog").post(Auth.verifyToken, controller.updateCatalog);
 
-router.route("/updateCondition").post(controller.updateCondition)
+router.route("/updateCondition").post(Auth.verifyToken, controller.updateCondition);
 
-router.route("/updateType").post(controller.updateType)
+router.route("/updateType").post(Auth.verifyToken, controller.updateType);
 
-router.route("/updateClassArchive").post(controller.updateClassArchive)
+router.route("/updateClassArchive").post(Auth.verifyToken, controller.updateClassArchive);
 
-router.route("/updateBuilding").post(controller.updateBuilding)
+router.route("/updateBuilding").post(Auth.verifyToken, controller.updateBuilding);
 
-router.route("/updateRoom").post(controller.updateRoom)
+router.route("/updateRoom").post(Auth.verifyToken, controller.updateRoom);
 
-router.route("/updateRollOPack").post(controller.updateRollOPack)
+router.route("/updateRollOPack").post(Auth.verifyToken, controller.updateRollOPack);
 
-router.route("/updateCabinet").post(controller.updateCabinet)
+router.route("/updateCabinet").post(Auth.verifyToken, controller.updateCabinet);
 
 module.exports = router;
