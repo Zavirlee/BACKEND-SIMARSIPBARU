@@ -15,7 +15,8 @@ const getIP = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const result = await Services.login(username, password);
+    const ip = req.body.ip;
+    const result = await Services.login(username, password, ip);
     if (result instanceof Error) {
       throw new Error(result);
     }
@@ -128,10 +129,11 @@ const archive_by_date = async (req, res) => {
 const add_archive = async (req, res) => {
   try {
     const user_id = req.verified;
+    const ip = req.body.ip;
 
-    console.log(user_id);
+    // console.log(user_id);
 
-    console.log(req.body);
+    // console.log(req.body);
 
     const {
       archive_file,
@@ -156,6 +158,7 @@ const add_archive = async (req, res) => {
     // const fileBuffer = Buffer.from(archive_file, "base64");
 
     const result = await Services.add_archive(
+      ip,
       archive_file,
       archive_code,
       archive_catalog_id,
@@ -201,6 +204,7 @@ const archiveDetail = async (req, res) => {
 const update_archive = async (req, res) => {
   try {
     const user_id = req.verified;
+    const ip = req.body.ip;
 
     console.log(user_id);
 
@@ -210,7 +214,7 @@ const update_archive = async (req, res) => {
 
     console.log("DATA 1 : ", updateData);
 
-    const result = await Services.update_archive(user_id, updateData);
+    const result = await Services.update_archive(user_id, ip, updateData);
 
     if (result instanceof Error) {
       throw new Error(result);
@@ -281,6 +285,8 @@ const update_user = async (req, res) => {
     const { user_id, username, password, satker, level_user_id } =
       req.body.data;
 
+    console.log("user update : ", req.body.data)
+
     // Buat objek yang hanya berisi data yang akan diubah
     const updatedUserData = {};
 
@@ -338,8 +344,9 @@ const delete_user = async (req, res) => {
 const logout = async (req, res) => {
   try {
     const { user_id } = req.body;
+    const ip = req.body.ip;
 
-    const result = await Services.logout(user_id);
+    const result = await Services.logout(user_id, ip);
     if (result instanceof Error) {
       throw new Error(result);
     }

@@ -12,7 +12,7 @@ const getIP = (req) => {
   return ip;
 };
 
-const login = async (username, password) => {
+const login = async (username, password, ip) => {
   try {
     const queryCheckSession =
       "SELECT login_session FROM user WHERE username = ? ";
@@ -42,6 +42,15 @@ const login = async (username, password) => {
           username,
         ]);
 
+        const archive_timestamp = new Date();
+        const queryLog =
+          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Login User',?,?,?)";
+        const resultLog = await databaseQuery(queryLog, [
+          archive_timestamp,
+          ip,
+          user.user_id,
+        ]);
+
         const token = jwt.sign(
           { id: user.user_id, username: user.username },
           process.env.SECRET
@@ -60,12 +69,22 @@ const login = async (username, password) => {
   }
 };
 
-const logout = async (user_id) => {
+const logout = async (user_id, ip) => {
   try {
     const date = new Date();
     const query =
       "UPDATE user SET login_session = 0, last_login = ? WHERE user_id = ?";
     const result = await databaseQuery(query, [date, user_id]);
+
+    const archive_timestamp = new Date();
+    const queryLog =
+      "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Logout User',?,?,?)";
+    const resultLog = await databaseQuery(queryLog, [
+      archive_timestamp,
+      ip,
+      user_id,
+    ]);
+
     if (!result.affectedRows === 1) {
       throw new Error("Logout Gagal");
     }
@@ -215,6 +234,7 @@ const archive_by_date = async () => {
 };
 
 const add_archive = async (
+  ip,
   archive_file,
   archive_code,
   archive_catalog_id,
@@ -260,8 +280,6 @@ const add_archive = async (
       throw new Error("Data tidak boleh kosong");
     }
 
-    console.log(archive_title);
-
     const queryArchive =
       "INSERT INTO archive(archive_code, archive_timestamp, archive_catalog_id, archive_title, archive_serial_number, archive_release_date, archive_file_number, archive_condition_id, archive_type_id, archive_class_id, archive_agency, archive_file, user_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
     const archive_result = await databaseQuery(queryArchive, [
@@ -297,10 +315,10 @@ const add_archive = async (
 
       if (archive_loc_result.affectedRows === 1) {
         const queryLog =
-          "INSERT INTO log(action, timestamp, archive_id, user_id) VALUES ('Add Archive',?,?,?)";
+          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Add Archive',?,?,?)";
         const resultLog = await databaseQuery(queryLog, [
           archive_timestamp,
-          archive_id,
+          ip,
           user_id,
         ]);
 
@@ -335,7 +353,7 @@ const archiveDetail = async (archive_id) => {
   }
 };
 
-const update_archive = async (user_id, updateData) => {
+const update_archive = async (user_id, ip, updateData) => {
   try {
     let updateQuery = "UPDATE archive SET ";
     const updateValues = [];
@@ -469,10 +487,10 @@ const update_archive = async (user_id, updateData) => {
       if (archiveResult.affectedRows === 1) {
         const archive_timestamp = new Date();
         const queryLog =
-          "INSERT INTO log(action, timestamp, archive_id, user_id) VALUES ('Update Archive',?,?,?)";
+          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Update Archive',?,?,?)";
         const resultLog = await databaseQuery(queryLog, [
           archive_timestamp,
-          updateData.archive_id,
+          ip,
           user_id,
         ]);
         console.log("Archive data updated successfully");
@@ -491,10 +509,10 @@ const update_archive = async (user_id, updateData) => {
       if (archiveLocResult.affectedRows === 1) {
         const archive_timestamp = new Date();
         const queryLog =
-          "INSERT INTO log(action, timestamp, archive_id, user_id) VALUES ('Update Archive',?,?,?)";
+          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Update Archive',?,?,?)";
         const resultLog = await databaseQuery(queryLog, [
           archive_timestamp,
-          updateData.archive_id,
+          ip,
           user_id,
         ]);
         console.log("Archive_loc data updated successfully");
@@ -517,10 +535,10 @@ const update_archive = async (user_id, updateData) => {
       ) {
         const archive_timestamp = new Date();
         const queryLog =
-          "INSERT INTO log(action, timestamp, archive_id, user_id) VALUES ('Update Archive',?,?,?)";
+          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Update Archive',?,?,?)";
         const resultLog = await databaseQuery(queryLog, [
           archive_timestamp,
-          updateData.archive_id,
+          ip,
           user_id,
         ]);
         console.log("Archive_loc data updated successfully");
@@ -530,10 +548,10 @@ const update_archive = async (user_id, updateData) => {
       ) {
         const archive_timestamp = new Date();
         const queryLog =
-          "INSERT INTO log(action, timestamp, archive_id, user_id) VALUES ('Update Archive',?,?,?)";
+          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Update Archive',?,?,?)";
         const resultLog = await databaseQuery(queryLog, [
           archive_timestamp,
-          updateData.archive_id,
+          ip,
           user_id,
         ]);
         console.log("Archive_loc data updated successfully");
@@ -543,10 +561,10 @@ const update_archive = async (user_id, updateData) => {
       ) {
         const archive_timestamp = new Date();
         const queryLog =
-          "INSERT INTO log(action, timestamp, archive_id, user_id) VALUES ('Update Archive',?,?,?)";
+          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Update Archive',?,?,?)";
         const resultLog = await databaseQuery(queryLog, [
           archive_timestamp,
-          updateData.archive_id,
+          ip,
           user_id,
         ]);
         console.log("Archive data and archive_loc data updated successfully");
@@ -567,7 +585,7 @@ const detail_user = async (user_id) => {
       "SELECT * FROM user INNER JOIN level_user ON user.level_user_id = level_user.level_user_id where user_id = ?";
     const result = await databaseQuery(query, [user_id]);
     if (!result.length) {
-      throw new Error("Pemanggilan Arsip Gagal");
+      throw new Error("Pemanggilan User Gagal");
     } else {
       const data = result;
 
@@ -1147,13 +1165,13 @@ const deleteCatalog = async (user_id, ip, label) => {
 
     if (resultDelete.affectedRows === 1) {
       const archive_timestamp = new Date();
-        const queryLog =
-          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Catalog',?,?,?)";
-        const resultLog = await databaseQuery(queryLog, [
-          archive_timestamp,
-          ip,
-          user_id,
-        ]);
+      const queryLog =
+        "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Catalog',?,?,?)";
+      const resultLog = await databaseQuery(queryLog, [
+        archive_timestamp,
+        ip,
+        user_id,
+      ]);
       return "Data berhasil dihapus";
     } else {
       throw new Error("Gagal Menghapus Data");
@@ -1171,13 +1189,13 @@ const deleteCondition = async (user_id, ip, label) => {
 
     if (resultDelete.affectedRows === 1) {
       const archive_timestamp = new Date();
-        const queryLog =
-          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Condition',?,?,?)";
-        const resultLog = await databaseQuery(queryLog, [
-          archive_timestamp,
-          ip,
-          user_id,
-        ]);
+      const queryLog =
+        "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Condition',?,?,?)";
+      const resultLog = await databaseQuery(queryLog, [
+        archive_timestamp,
+        ip,
+        user_id,
+      ]);
       return "Data berhasil dihapus";
     } else {
       throw new Error("Gagal Menghapus Data");
@@ -1194,13 +1212,13 @@ const deleteType = async (user_id, ip, label) => {
 
     if (resultDelete.affectedRows === 1) {
       const archive_timestamp = new Date();
-        const queryLog =
-          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Type',?,?,?)";
-        const resultLog = await databaseQuery(queryLog, [
-          archive_timestamp,
-          ip,
-          user_id,
-        ]);
+      const queryLog =
+        "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Type',?,?,?)";
+      const resultLog = await databaseQuery(queryLog, [
+        archive_timestamp,
+        ip,
+        user_id,
+      ]);
       return "Data berhasil dihapus";
     } else {
       throw new Error("Gagal Menghapus Data");
@@ -1217,13 +1235,13 @@ const deleteClassArchive = async (user_id, ip, label) => {
 
     if (resultDelete.affectedRows === 1) {
       const archive_timestamp = new Date();
-        const queryLog =
-          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Class',?,?,?)";
-        const resultLog = await databaseQuery(queryLog, [
-          archive_timestamp,
-          ip,
-          user_id,
-        ]);
+      const queryLog =
+        "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Class',?,?,?)";
+      const resultLog = await databaseQuery(queryLog, [
+        archive_timestamp,
+        ip,
+        user_id,
+      ]);
       return "Data berhasil dihapus";
     } else {
       throw new Error("Gagal Menghapus Data");
@@ -1239,13 +1257,13 @@ const deleteBuilding = async (user_id, ip, label) => {
     const resultDelete = await databaseQuery(queryDelete, [label]);
     if (resultDelete.affectedRows === 1) {
       const archive_timestamp = new Date();
-        const queryLog =
-          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Building',?,?,?)";
-        const resultLog = await databaseQuery(queryLog, [
-          archive_timestamp,
-          ip,
-          user_id,
-        ]);
+      const queryLog =
+        "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-Building',?,?,?)";
+      const resultLog = await databaseQuery(queryLog, [
+        archive_timestamp,
+        ip,
+        user_id,
+      ]);
       return "Data berhasil dihapus";
     } else {
       throw new Error("Gagal Menghapus Data");
@@ -1285,13 +1303,13 @@ const deleteRollOPack = async (user_id, ip, label) => {
 
     if (resultDelete.affectedRows === 1) {
       const archive_timestamp = new Date();
-        const queryLog =
-          "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-RollOPack',?,?,?)";
-        const resultLog = await databaseQuery(queryLog, [
-          archive_timestamp,
-          ip,
-          user_id,
-        ]);
+      const queryLog =
+        "INSERT INTO log(action, timestamp, ip, user_id) VALUES ('Delete Master-RollOPack',?,?,?)";
+      const resultLog = await databaseQuery(queryLog, [
+        archive_timestamp,
+        ip,
+        user_id,
+      ]);
       return "Data berhasil dihapus";
     } else {
       throw new Error("Gagal Menghapus Data");
